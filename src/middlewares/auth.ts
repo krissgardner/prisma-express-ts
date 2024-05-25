@@ -1,9 +1,9 @@
-import passport from 'passport';
-import httpStatus from 'http-status';
-import ApiError from '../utils/ApiError';
-import { roleRights } from '../config/roles';
-import { NextFunction, Request, Response } from 'express';
-import { User } from '@prisma/client';
+import passport from 'passport'
+import httpStatus from 'http-status'
+import ApiError from '../utils/ApiError'
+import { roleRights } from '../config/roles'
+import { NextFunction, Request, Response } from 'express'
+import { User } from '@prisma/client'
 
 const verifyCallback =
   (
@@ -14,22 +14,24 @@ const verifyCallback =
   ) =>
   async (err: unknown, user: User | false, info: unknown) => {
     if (err || info || !user) {
-      return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
+      return reject(
+        new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate')
+      )
     }
-    req.user = user;
+    req.user = user
 
     if (requiredRights.length) {
-      const userRights = roleRights.get(user.role) ?? [];
+      const userRights = roleRights.get(user.role) ?? []
       const hasRequiredRights = requiredRights.every((requiredRight) =>
         userRights.includes(requiredRight)
-      );
+      )
       if (!hasRequiredRights && req.params.userId !== user.id) {
-        return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'));
+        return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'))
       }
     }
 
-    resolve();
-  };
+    resolve()
+  }
 
 const auth =
   (...requiredRights: string[]) =>
@@ -39,10 +41,10 @@ const auth =
         'jwt',
         { session: false },
         verifyCallback(req, resolve, reject, requiredRights)
-      )(req, res, next);
+      )(req, res, next)
     })
       .then(() => next())
-      .catch((err) => next(err));
-  };
+      .catch((err) => next(err))
+  }
 
-export default auth;
+export default auth
